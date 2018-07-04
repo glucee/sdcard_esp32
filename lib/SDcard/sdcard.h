@@ -2,11 +2,11 @@
 #define SDCARD_H
 
 #include <FS.h>
-#include <SD.h>
-#include <SPI.h>
+#include <SD_MMC.h>
 
 extern void setup_sdcard();
 extern void run_sdcard();
+extern void test_sdcard();
 extern void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 extern void createDir(fs::FS &fs, const char * path);
 extern void removeDir(fs::FS &fs, const char * path);

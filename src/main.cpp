@@ -5,7 +5,7 @@ void setup()
 {
     Serial.begin(115200);
     setup_sdcard();
-    /*auto calabriation when start to use the device*/
+    test_sdcard();
 }
 
 void loop()

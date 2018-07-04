@@ -2,18 +2,18 @@
  * Connect the SD card to the following pins:
  *
  * SD Card | ESP32
- *    D2       -
- *    D3       SS
- *    CMD      MOSI
+ *    D2       12
+ *    D3       13
+ *    CMD      15
  *    VSS      GND
  *    VDD      3.3V
- *    CLK      SCK
+ *    CLK      14
  *    VSS      GND
- *    D0       MISO
- *    D1       -
+ *    D0       2  (add 1K pull up after flashing)
+ *    D1       4
  */
-#include "sdcard.h"
 
+#include "sdcard.h"
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
     Serial.printf("Listing directory: %s\n", dirname);
@@ -77,7 +77,6 @@ void readFile(fs::FS &fs, const char * path){
     while(file.available()){
         Serial.write(file.read());
     }
-    file.close();
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
@@ -93,7 +92,6 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
     } else {
         Serial.println("Write failed");
     }
-    file.close();
 }
 
 void appendFile(fs::FS &fs, const char * path, const char * message){
@@ -109,7 +107,6 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
     } else {
         Serial.println("Append failed");
     }
-    file.close();
 }
 
 void renameFile(fs::FS &fs, const char * path1, const char * path2){
@@ -173,18 +170,18 @@ void testFileIO(fs::FS &fs, const char * path){
 }
 
 void setup_sdcard(){
-    if(!SD.begin()){
+    if(!SD_MMC.begin()){
         Serial.println("Card Mount Failed");
         return;
     }
-    uint8_t cardType = SD.cardType();
+    uint8_t cardType = SD_MMC.cardType();
 
     if(cardType == CARD_NONE){
-        Serial.println("No SD card attached");
+        Serial.println("No SD_MMC card attached");
         return;
     }
 
-    Serial.print("SD Card Type: ");
+    Serial.print("SD_MMC Card Type: ");
     if(cardType == CARD_MMC){
         Serial.println("MMC");
     } else if(cardType == CARD_SD){
@@ -195,24 +192,27 @@ void setup_sdcard(){
         Serial.println("UNKNOWN");
     }
 
-    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    Serial.printf("SD Card Size: %lluMB\n", cardSize);
+    uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
+    Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
+    Serial.printf("Total space: %lluMB\n", SD_MMC.totalBytes() / (1024 * 1024));
+    Serial.printf("Used space: %lluMB\n", SD_MMC.usedBytes() / (1024 * 1024));
+}
 
-    listDir(SD, "/", 0);
-    createDir(SD, "/mydir");
-    listDir(SD, "/", 0);
-    removeDir(SD, "/mydir");
-    listDir(SD, "/", 2);
-    writeFile(SD, "/hello.txt", "Hello ");
-    appendFile(SD, "/hello.txt", "World!\n");
-    readFile(SD, "/hello.txt");
-    deleteFile(SD, "/foo.txt");
-    renameFile(SD, "/hello.txt", "/foo.txt");
-    readFile(SD, "/foo.txt");
-    testFileIO(SD, "/test.txt");
-    Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-    Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+void test_sdcard(){
+    listDir(SD_MMC, "/", 0);
+    createDir(SD_MMC, "/mydir");
+    listDir(SD_MMC, "/", 0);
+    removeDir(SD_MMC, "/mydir");
+    listDir(SD_MMC, "/", 2);
+    writeFile(SD_MMC, "/hello.txt", "Hello ");
+    appendFile(SD_MMC, "/hello.txt", "World!\n");
+    readFile(SD_MMC, "/hello.txt");
+    deleteFile(SD_MMC, "/foo.txt");
+    renameFile(SD_MMC, "/hello.txt", "/foo.txt");
+    readFile(SD_MMC, "/foo.txt");
+    testFileIO(SD_MMC, "/test.txt");
 }
 
 void run_sdcard(){
+
 }
